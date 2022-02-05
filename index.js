@@ -2,7 +2,6 @@
 import * as THREE from "https://threejs.org/build/three.module.js";
 import { GLTFLoader } from "https://threejs.org/examples/jsm/loaders/GLTFLoader.js";
 import { OrbitControls } from "https://threejs.org/examples/jsm/controls/OrbitControls.js";
-import {GUI} from 'https://threejs.org/examples/jsm/libs/lil-gui.module.min.js';
 
 const scene = new THREE.Scene();
 scene.background = new THREE.Color( 0x7e8c8c );
@@ -11,18 +10,17 @@ const canvas = document.querySelector('#c');
 const renderer = new THREE.WebGLRenderer({canvas});
 renderer.shadowMap.enabled = true;
 
+// camera
 
 const camera = new THREE.PerspectiveCamera( 75, window.innerWidth / window.innerHeight, 0.1, 3000 );
 camera.position.set(-400,250,500);
-// camera.position.set(0,500,0);
 
 const controlador = new OrbitControls(camera, renderer.domElement);
 controlador.target.set(0, 5, 0);
 controlador.update();
 
-// const light = new THREE.AmbientLight( 0xffffff, 1);
-// scene.add( light );
 
+// luz global
 {
     const skyColor = 0xB1E1FF;
     const groundColor = 0xB97A20;  
@@ -31,6 +29,7 @@ controlador.update();
     scene.add(light);
 }
 
+// luz direcionada
 {
     const color = 0xFFFFFF;
     const intensity = 1;
@@ -62,16 +61,19 @@ controlador.update();
     helper.visible = false;
 }
 
-const globalPlanes = [new THREE.Plane( new THREE.Vector3( -1, 0, 0 ), 300.1 ), //direita
+// planos de corte
+{
+  const globalPlanes = [new THREE.Plane( new THREE.Vector3( -1, 0, 0 ), 300.1 ), //direita
                       new THREE.Plane( new THREE.Vector3(  1, 0, 0 ), 300.1 ), //esquerda
                       new THREE.Plane( new THREE.Vector3(  0, 1, 0 ), 5.01 )]; //baixo
 
 renderer.localClippingEnabled = true;
 renderer.clippingPlanes = globalPlanes;
-
+}
 
 const loader = new THREE.TextureLoader();
 
+//grama
 {
   var texture = loader.load('texturas/grama.jpg');
   texture.wrapS = THREE.RepeatWrapping;
@@ -92,6 +94,7 @@ const loader = new THREE.TextureLoader();
   material.dispose();
 }
 
+//asfalto
 {
   texture = loader.load('texturas/asfalto.jpg');
   texture.wrapS = THREE.MirroredRepeatWrapping;
@@ -112,71 +115,79 @@ const loader = new THREE.TextureLoader();
   material.dispose();
 }
 
-var objs = [
-  {posicao: [0,5.5,-43], geometria: [80, 0.5, 40]},
-  {posicao: [0,5.5,-1], geometria: [80, 0.5, 40]},
-  {posicao: [0,5.5,41], geometria: [80, 0.5, 40]},
-  {posicao: [0,5.5,83], geometria: [80, 0.5, 40]},
-  {posicao: [0,5.5,125], geometria: [80, 0.5, 40]},
+//lajota da calcada
+{
+  var objs = [
+    {posicao: [0,5.5,-43], geometria: [80, 0.5, 40]},
+    {posicao: [0,5.5,-1], geometria: [80, 0.5, 40]},
+    {posicao: [0,5.5,41], geometria: [80, 0.5, 40]},
+    {posicao: [0,5.5,83], geometria: [80, 0.5, 40]},
+    {posicao: [0,5.5,125], geometria: [80, 0.5, 40]},
 
-  {posicao: [82,5.5,83], geometria: [80, 0.5, 40]},
-  {posicao: [164,5.5,83], geometria: [80, 0.5, 40]},
-  {posicao: [246,5.5,83], geometria: [80, 0.5, 40]},
-  {posicao: [328,5.5,83], geometria: [80, 0.5, 40]},
+    {posicao: [82,5.5,83], geometria: [80, 0.5, 40]},
+    {posicao: [164,5.5,83], geometria: [80, 0.5, 40]},
+    {posicao: [246,5.5,83], geometria: [80, 0.5, 40]},
+    {posicao: [328,5.5,83], geometria: [80, 0.5, 40]},
 
-  {posicao: [-82,5.5,83], geometria: [80, 0.5, 40]},
-  {posicao: [-164,5.5,83], geometria: [80, 0.5, 40]},
-  {posicao: [-246,5.5,83], geometria: [80, 0.5, 40]},
-  {posicao: [-328,5.5,83], geometria: [80, 0.5, 40]},
-];
+    {posicao: [-82,5.5,83], geometria: [80, 0.5, 40]},
+    {posicao: [-164,5.5,83], geometria: [80, 0.5, 40]},
+    {posicao: [-246,5.5,83], geometria: [80, 0.5, 40]},
+    {posicao: [-328,5.5,83], geometria: [80, 0.5, 40]},
+  ];
 
-objs.forEach( (obj) => {
-  const {posicao, geometria} = obj;
+  objs.forEach( (obj) => {
+    const {posicao, geometria} = obj;
 
-  texture = loader.load('texturas/concreto.jpg');
-  texture.magFilter = THREE.NearestFilter;
+    texture = loader.load('texturas/concreto.jpg');
+    texture.magFilter = THREE.NearestFilter;
 
-  var geometry = new THREE.BoxGeometry(geometria[0],geometria[1],geometria[2]);
-  var material = new THREE.MeshPhongMaterial( {  map: texture} );
-  var cube = new THREE.Mesh( geometry, material );
-  cube.position.set(posicao[0],posicao[1],posicao[2]);
-  cube.receiveShadow = true;
-  cube.castShadow = true;
-  scene.add( cube );
+    var geometry = new THREE.BoxGeometry(geometria[0],geometria[1],geometria[2]);
+    var material = new THREE.MeshPhongMaterial( {  map: texture} );
+    var cube = new THREE.Mesh( geometry, material );
+    cube.position.set(posicao[0],posicao[1],posicao[2]);
+    cube.receiveShadow = true;
+    cube.castShadow = true;
+    scene.add( cube );
 
-  texture.dispose();
-  geometry.dispose();
-  material.dispose();
+    texture.dispose();
+    geometry.dispose();
+    material.dispose();
 
-});
+  });
+}
 
 const gltfLoader = new GLTFLoader();
-let car;
 
-gltfLoader.load("models/car/scene.gltf", function ( gltf ) {
-  const root = gltf.scene;
-  root.scale.set(0.15,0.15,0.15);
-  root.position.set(200, 5, 250);
-  root.rotation.y = Math.PI * -.5;
+// carro
+let car
+{
+  gltfLoader.load("models/car/scene.gltf", function ( gltf ) {
+    const root = gltf.scene;
+    root.scale.set(0.15,0.15,0.15);
+    root.position.set(200, 5, 250);
+    root.rotation.y = Math.PI * -.5;
 
-  root.traverse((obj) => {
-    if (obj.castShadow !== undefined) {
-      obj.castShadow = true;
-      obj.receiveShadow = true;
-    }
-  });
+    root.traverse((obj) => {
+      if (obj.castShadow !== undefined) {
+        obj.castShadow = true;
+        obj.receiveShadow = true;
+      }
+    });
 
-  car = root;
-  scene.add(root);
-    
-},	function ( xhr ) {
-  console.log( ( xhr.loaded / xhr.total * 100 ) + '% loaded' );
-},
-function ( error ) {
-  console.log( 'An error happened' );
+    car = root;
+    scene.add(root);
+      
+  },	function ( xhr ) {
+    console.log( ( xhr.loaded / xhr.total * 100 ) + '% loaded' );
+  },
+  function ( error ) {
+    console.log( 'An error happened' );
 });
+}
 
-gltfLoader.load("models/house/scene.gltf", function ( gltf ) {
+// casa
+{
+  gltfLoader.load("models/house/scene.gltf", function ( gltf ) {
     const root = gltf.scene;
     root.scale.set(12,12,12);
     root.position.set(0, 4, -150);
@@ -193,118 +204,127 @@ gltfLoader.load("models/house/scene.gltf", function ( gltf ) {
     
     scene.add(root);
 
-},	function ( xhr ) {
+  },	function ( xhr ) {
+      console.log( ( xhr.loaded / xhr.total * 100 ) + '% loaded' );
+  },
+  function ( error ) {
+      console.log( 'An error happened' );
+  });
+}
+
+//arvores
+{
+  gltfLoader.load('models/low_poly_trees/scene.gltf', function ( gltf ) {
+    const root = gltf.scene;
+    root.traverse((obj) => {
+      if (obj.castShadow !== undefined) {
+        obj.castShadow = true;
+        obj.receiveShadow = true;
+      }
+    });
+
+    const base = new THREE.Object3D();
+    scene.add(base);
+
+    const arvore1 = root.getObjectByName('_12_tree');
+    arvore1.scale.set(7,7,7);
+    arvore1.position.set(270,5,30);
+    base.add(arvore1)
+
+    const arvore3 = root.getObjectByName('_6_tree');
+    arvore3.scale.set(12,12,12);
+    arvore3.position.set(-200,5,-40);
+    base.add(arvore3)
+
+    const arvore2 = root.getObjectByName('_3_tree');
+    arvore2.scale.set(12,12,12);
+    arvore2.position.set(220,5,-250);
+    base.add(arvore2)
+
+    const arvore4 = root.getObjectByName('_5_tree');
+    arvore4.scale.set(13,13,13);
+    arvore4.position.set(250,5,-110);
+    arvore4.rotateZ(45);
+    base.add(arvore4);
+
+    const arvore5 = root.getObjectByName('_7_tree');
+    arvore5.scale.set(13,13,13);
+    arvore5.position.set(110,5,5);
+    base.add(arvore5);
+
+    const rock = root.getObjectByName('Rock_1_');
+    rock.scale.set(5,5,5);
+    rock.position.set(-250,5,-240);
+    base.add(rock);
+
+
+  },	function ( xhr ) {
+      console.log( ( xhr.loaded / xhr.total * 100 ) + '% loaded' );
+  },
+  function ( error ) {
+      console.log( 'An error happened' );
+  });
+}
+
+//cerca
+{
+  gltfLoader.load("models/wood_fence_low_poly/scene.gltf", function ( gltf ) {
+    const root = gltf.scene;
+    root.traverse((obj) => {
+      if (obj.castShadow !== undefined) {
+        obj.castShadow = true;
+        obj.receiveShadow = true;
+      }
+    });
+    root.scale.set(0.15,0.15,0.15);
+    root.rotation.y = Math.PI * -.5;
+
+    const base = new THREE.Object3D();
+    scene.add(base);
+
+    var objs = [-345, -305, -265, -225, -185, -145, -105, -65,
+                65, 105, 145, 185, 225, 265, 305];
+
+    objs.forEach( (obj) => {
+      const fence = root.clone();
+      fence.position.set(obj,5,47);
+      base.add(fence);
+    });
+
+  },	function ( xhr ) {
     console.log( ( xhr.loaded / xhr.total * 100 ) + '% loaded' );
-},
-function ( error ) {
+  },
+  function ( error ) {
     console.log( 'An error happened' );
-});
-
-gltfLoader.load('models/low_poly_trees/scene.gltf', function ( gltf ) {
-  const root = gltf.scene;
-  root.traverse((obj) => {
-    if (obj.castShadow !== undefined) {
-      obj.castShadow = true;
-      obj.receiveShadow = true;
-    }
   });
+}
 
-  const base = new THREE.Object3D();
-  scene.add(base);
+// postes
+{
+  gltfLoader.load('models/street_light/scene.gltf', function ( gltf ) {
+    const root = gltf.scene;
+    root.traverse((obj) => {
+      if (obj.castShadow !== undefined) {
+        obj.castShadow = true;
+        obj.receiveShadow = true;
+      }
+    });
 
-  const arvore1 = root.getObjectByName('_12_tree');
-  arvore1.scale.set(7,7,7);
-  arvore1.position.set(270,5,30);
-  base.add(arvore1)
+    root.scale.set(23,23,23);
+    root.position.set(200, 0, 130);
+    scene.add(root);
+    
+    const post2 = root.clone();
+    post2.position.set(-200, 0, 130);
+    scene.add(post2);
 
-  const arvore3 = root.getObjectByName('_6_tree');
-  arvore3.scale.set(12,12,12);
-  arvore3.position.set(-200,5,-40);
-  base.add(arvore3)
-
-  const arvore2 = root.getObjectByName('_3_tree');
-  arvore2.scale.set(12,12,12);
-  arvore2.position.set(220,5,-250);
-  base.add(arvore2)
-
-  const arvore4 = root.getObjectByName('_5_tree');
-  arvore4.scale.set(13,13,13);
-  arvore4.position.set(250,5,-110);
-  arvore4.rotateZ(45);
-  base.add(arvore4);
-
-  const arvore5 = root.getObjectByName('_7_tree');
-  arvore5.scale.set(13,13,13);
-  arvore5.position.set(110,5,5);
-  base.add(arvore5);
-
-  const rock = root.getObjectByName('Rock_1_');
-  rock.scale.set(5,5,5);
-  rock.position.set(-250,5,-240);
-  base.add(rock);
-
-
-},	function ( xhr ) {
+  },	function ( xhr ) {
     console.log( ( xhr.loaded / xhr.total * 100 ) + '% loaded' );
-},
-function ( error ) {
+  },
+  function ( error ) {
     console.log( 'An error happened' );
-});
-
-gltfLoader.load("models/wood_fence_low_poly/scene.gltf", function ( gltf ) {
-  const root = gltf.scene;
-  root.traverse((obj) => {
-    if (obj.castShadow !== undefined) {
-      obj.castShadow = true;
-      obj.receiveShadow = true;
-    }
   });
-  root.scale.set(0.15,0.15,0.15);
-  root.rotation.y = Math.PI * -.5;
-
-  const base = new THREE.Object3D();
-  scene.add(base);
-
-  var objs = [-345, -305, -265, -225, -185, -145, -105, -65,
-              65, 105, 145, 185, 225, 265, 305];
-
-  objs.forEach( (obj) => {
-    const fence = root.clone();
-    fence.position.set(obj,5,47);
-    base.add(fence);
-  });
-
-},	function ( xhr ) {
-  console.log( ( xhr.loaded / xhr.total * 100 ) + '% loaded' );
-},
-function ( error ) {
-  console.log( 'An error happened' );
-});
-
-gltfLoader.load('models/street_light/scene.gltf', function ( gltf ) {
-  const root = gltf.scene;
-  root.traverse((obj) => {
-    if (obj.castShadow !== undefined) {
-      obj.castShadow = true;
-      obj.receiveShadow = true;
-    }
-  });
-
-  root.scale.set(23,23,23);
-  root.position.set(200, 0, 130);
-  scene.add(root);
-  
-  const post2 = root.clone();
-  post2.position.set(-200, 0, 130);
-  scene.add(post2);
-
-},	function ( xhr ) {
-  console.log( ( xhr.loaded / xhr.total * 100 ) + '% loaded' );
-},
-function ( error ) {
-  console.log( 'An error happened' );
-});
-
+}
 
 function resizeRendererToDisplaySize(renderer) {
   const canvas = renderer.domElement;
